@@ -90,6 +90,13 @@
     .eg { color: var(--muted); font-size: .93rem; }
     .agents { max-height: 280px; overflow: auto; font-size: .86rem; }
     .agents-label { margin-top: 12px !important; }
+    .progress { position: fixed; top: 0; left: 0; z-index: 10; height: 3px; width: 0; background: var(--green); }
+    .tablist { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .tablist button { padding: 6px 14px; border: 1px solid #a7c5b8; border-radius: 999px; background: #fff; color: var(--green); font: inherit; font-size: .92rem; cursor: pointer; }
+    .tablist button:hover { background: #f2f8f4; }
+    .tablist button[aria-selected="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+    .tabbed .task { margin-top: 12px; }
+    .tabbed .task > h3 { display: none; }
     .context-shot { margin-top: 10px; }
     .context-shot img { max-width: 340px; }
     .method { margin: 14px 0 0; }
@@ -108,8 +115,7 @@
       nav a { padding: 4px 8px; }
     }
     @media (max-width: 560px) {
-      .prompts, .habit, .screens, .routing .habit, .compare { grid-template-columns: 1fr; }
-      .compare > .vague { border-right: 0; }
+        .compare > .vague { border-right: 0; }
       .compare > .head { display: none; }
       .compare > .vague { border-top: 2px solid var(--line); }
       .compare > .clear { border-top: 0; padding-top: 0; }
@@ -123,6 +129,9 @@
       body { background: white; font-size: 11pt; }
       .layout { display: block; padding: 0; }
       aside, .copy, .back, .placeholder { display: none; }
+      .progress, .tablist { display: none !important; }
+      .tabbed .task { display: block !important; }
+      .tabbed .task > h3 { display: block; }
       .task, figure { break-inside: avoid; }
       h2, h3 { break-after: avoid; }
       header, section { padding: 16px 0; }
@@ -131,6 +140,7 @@
   </style>
 </head>
 <body>
+  <div class="progress" aria-hidden="true"></div>
   <div class="layout" id="top">
     <aside>
       <p class="nav-label">目录</p>
@@ -368,6 +378,7 @@ List issues in order of impact. Common areas:
           <h3 class="block-title">常见的活</h3>
           <p>灰底框里的话可以直接复制发给它，把型号和材料换成你自己的。</p>
 
+          <div class="task-tabs">
           <div class="task">
             <h3>1. 查芯片手册和器件资料</h3>
             <p>查寄存器、外围电路选值，芯片选型对比，把英文手册整理成中文步骤。<strong>让它写明手册版本、章节和页码</strong>，你翻过去就能核对。</p>
@@ -414,6 +425,7 @@ List issues in order of impact. Common areas:
               <div class="prompt"><p>把附件里电路板照片的背景换成纯白，去掉桌面上的杂物。板子上的器件、丝印、颜色和拍摄角度都保持不变，用在产品手册里。</p><button class="copy" type="button" hidden>复制示例</button></div>
               <div class="prompt"><p>参考附件的电路板照片，生成一张产品手册用的写实渲染图，正上方俯视，纯白背景，柔和的棚拍光。板子外形、安装孔、每个接口的数量和位置都要和照片一致，不要卡通化，不要加文字标注。</p><button class="copy" type="button" hidden>复制示例</button></div>
             </div>
+          </div>
           </div>
         </div>
 
@@ -519,17 +531,53 @@ List issues in order of impact. Common areas:
     </main>
   </div>
   <script>
-    const links = document.querySelectorAll('nav a');
-    function markSection() {
+    // 目录：滚动时高亮当前所在的章节，顶部进度条显示阅读进度
+    const links = [...document.querySelectorAll('nav a')];
+    const sections = links.map(link => document.querySelector(link.hash));
+    const bar = document.querySelector('.progress');
+    function onScroll() {
+      let current = sections[0];
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top < innerHeight * 0.3) current = section;
+      }
       for (const link of links) {
-        if (link.hash === location.hash) link.setAttribute('aria-current', 'location');
+        if (link.hash === '#' + current.id) link.setAttribute('aria-current', 'location');
         else link.removeAttribute('aria-current');
       }
+      const max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = (max > 0 ? scrollY / max * 100 : 0) + '%';
     }
-    window.addEventListener('hashchange', markSection);
-    markSection();
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    onScroll();
+
+    // 「常见的活」：把各类任务变成标签，一次只看一类
+    for (const group of document.querySelectorAll('.task-tabs')) {
+      const panels = [...group.querySelectorAll(':scope > .task')];
+      const list = document.createElement('div');
+      list.className = 'tablist';
+      list.setAttribute('role', 'tablist');
+      const buttons = panels.map((panel, i) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('role', 'tab');
+        button.textContent = panel.querySelector('h3').textContent.replace(/^\d+\.\s*/, '');
+        button.addEventListener('click', () => select(i));
+        list.append(button);
+        panel.setAttribute('role', 'tabpanel');
+        return button;
+      });
+      function select(index) {
+        panels.forEach((panel, i) => { panel.hidden = i !== index; });
+        buttons.forEach((button, i) => { button.setAttribute('aria-selected', i === index); });
+      }
+      group.prepend(list);
+      group.classList.add('tabbed');
+      select(0);
+    }
 
     for (const button of document.querySelectorAll('.copy')) {
+      const label = button.textContent;
       button.hidden = false;
       button.addEventListener('click', async () => {
         const prompt = button.previousElementSibling;
@@ -544,7 +592,7 @@ List issues in order of impact. Common areas:
           selection.addRange(range);
           button.textContent = '已选中，请按 Ctrl+C';
         }
-        setTimeout(() => { button.textContent = '复制示例'; }, 2500);
+        setTimeout(() => { button.textContent = label; }, 2500);
       });
     }
   </script>
