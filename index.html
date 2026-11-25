@@ -293,7 +293,8 @@ List issues in order of impact. Focus on what&#x27;s relevant to the question; d
 - STM32: check power, clocks, and boot pins against the specific series datasheet.
 
 ## Changes
-- Propose the smallest change that solves the problem. Do not add circuits or parts for hypothetical requirements.
+- Fix the root cause with the simplest effective change.
+- Don&#x27;t add circuits or parts for hypothetical requirements.
 - If extra protection is optional, explain the risk and ask whether to add it instead of adding it automatically.
 - Do not hide hardware problems with added delays, retries, or resets.</p><button class="copy" type="button" hidden>复制全文</button></div>
               <p class="agents-label"><strong>嵌入式</strong>（代码 + 硬件）</p>
@@ -326,7 +327,7 @@ List issues in order of impact. Focus on what&#x27;s relevant to the question; d
 - Do not hide bugs or hardware faults behind retries, delays, resets, default values, or ignored errors.
 
 ## Changes
-- Make the smallest coherent change that fully solves the request.
+- Make the simplest change that fully solves the request.
 - Modify existing code directly instead of creating a parallel implementation. Remove old logic that the new code replaces; do not keep it &quot;just in case&quot;.
 - Do not reformat or touch unrelated code. Remove incidental changes you introduced.
 - Avoid hand-editing generated code (CubeMX, EtherCAT SSC, etc.). For STM32, only edit between `USER CODE BEGIN / END` so changes survive regeneration.
