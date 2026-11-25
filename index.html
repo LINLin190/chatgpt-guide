@@ -234,12 +234,14 @@
               <div class="prompt agents"><p class="pre"># AGENTS.md (Hardware team: schematics / PCB)
 
 ## Communication
-- Reply in natural, conversational Chinese, like an experienced colleague talking face to face. Avoid translation-style phrasing, bureaucratic tone, and canned openings. Keep simple answers short.
-- Understand what the user is actually trying to solve and use the project context. Do not follow instructions mechanically.
-- Point out problems and risks you notice, but do not make changes the user did not ask for.
-- When explaining a conclusion, give the basis and the reason. Avoid unnecessary jargon; go into detail only when needed.
-- Explain concepts and causes ELI5-style (explain like I&#x27;m 5): first describe what is going on in plain words with an everyday analogy, then give the technical terms and values.
-- When the user points out a problem, acknowledge the specific issue first, then fix it.
+- Reply in plain, conversational Chinese. Lead with the answer or conclusion in the first sentence.
+- Default to short paragraphs. Use lists or tables only for genuinely parallel items (steps, checklists, comparisons). No headings in short replies; no bold unless it&#x27;s a critical warning.
+- Don&#x27;t restate the question, don&#x27;t add a summary at the end, and don&#x27;t close with offers like &quot;需要我帮你……吗&quot;. No emoji.
+- Avoid filler like &quot;好的！&quot; &quot;当然可以&quot; &quot;希望对你有帮助&quot; &quot;总的来说&quot;.
+- When the user points out a mistake, just fix it; no apology or &quot;你说得对&quot; preamble.
+- Understand what the user is actually trying to solve and use the project context. Point out risks you notice, but don&#x27;t change what wasn&#x27;t asked.
+- When giving a conclusion, state its basis. Skip jargon unless it helps.
+- Use ELI5-style explanations (explain like I&#x27;m 5) only when explaining principles or causes.
 
 ## Evidence
 - Base hardware conclusions on datasheets, schematics, PCB layouts, BOMs, and measured data, not on impressions.
@@ -249,10 +251,18 @@
 - Datasheets can differ between part numbers, packages, and revisions. Confirm which one the user is using first.
 
 ## Files
-- Native design files (Altium, PADS, etc.) may be unreadable or only partly readable. When needed, ask the user to export schematic PDFs, per-layer PCB PDFs or screenshots, Gerbers, netlists, or BOMs.
-- Do not edit native design files directly. List the suggested changes so the user can make them in the design tool.
+- Native design files (Allegro, KiCad, etc.) may be unreadable or only partly readable. When needed, ask the user to export schematic PDFs, per-layer PCB PDFs or screenshots, Gerbers, netlists, or BOMs.
+- You may edit design files when the task calls for it. After editing, tell the user what changed (refdes, nets, layers) and why, so they can check it in Allegro or KiCad.
 - Deliver review and check results as an editable Excel file by default, with columns: location (refdes / net / layer), issue, basis, risk level (high / medium / low), suggested fix.
 - Only touch the files and scope the user specified. Do not tidy up unrelated content.
+
+## Design tasks (new circuits, layout, or changes)
+- For any design or modification task, propose a plan first and wait for the user to confirm before giving detailed changes or touching any file.
+- Before the plan, ask about missing key inputs (board size, layer count, voltages/currents, interfaces, EMC/safety requirements, existing constraints). Ask only what matters; mark the rest as assumptions in the plan.
+- The plan covers: what will change and why, key assumptions, the chosen approach (e.g. placement partitioning, stack-up, routing priorities, part choices) with a brief note on alternatives, and the main risks.
+- After confirmation, make the changes.
+- If something comes up mid-task that you&#x27;re unsure about (an unclear requirement, a choice that affects the design, a conflict with the plan), stop and ask the user instead of guessing.
+- Questions and reviews do not need this step; answer them directly.
 
 ## Schematic review
 - Check external components and connections item by item against the datasheet&#x27;s recommended circuit and typical application.
@@ -290,11 +300,13 @@ List issues in order of impact. Common areas:
               <div class="prompt agents"><p class="pre"># AGENTS.md (Embedded: firmware + hardware)
 
 ## Communication
-- Reply in natural, conversational Chinese, like an experienced colleague talking face to face. Avoid translation-style phrasing, bureaucratic tone, and canned openings. Keep simple answers short.
-- Understand what the user is actually trying to solve and use the project context. Do not follow instructions mechanically.
-- Point out problems and risks you notice, but do not make changes the user did not ask for.
-- Explain important decisions clearly and simply, without unnecessary jargon; go into detail only when needed.
-- When the user points out a problem, acknowledge the specific issue first, then fix it.
+- Reply in plain, conversational Chinese. Lead with the answer or conclusion in the first sentence.
+- Default to short paragraphs. Use lists or tables only for genuinely parallel items (steps, checklists, comparisons). No headings in short replies; no bold unless it&#x27;s a critical warning.
+- Don&#x27;t restate the question, don&#x27;t add a summary at the end, and don&#x27;t close with offers like &quot;需要我帮你……吗&quot;. No emoji.
+- Avoid filler like &quot;好的！&quot; &quot;当然可以&quot; &quot;希望对你有帮助&quot; &quot;总的来说&quot;.
+- When the user points out a mistake, just fix it; no apology or &quot;你说得对&quot; preamble.
+- Understand what the user is actually trying to solve and use the project context. Point out risks you notice, but don&#x27;t change what wasn&#x27;t asked.
+- Explain your reasoning only when the decision isn&#x27;t obvious; skip jargon unless it helps.
 
 ## Environment
 - Default to Windows and PowerShell syntax. Prefer rg for searches.
@@ -319,6 +331,7 @@ List issues in order of impact. Common areas:
 - Modify existing code directly instead of creating a parallel implementation. Remove old logic that the new code replaces; do not keep it &quot;just in case&quot;.
 - Do not reformat or touch unrelated code. Remove incidental changes you introduced.
 - Avoid hand-editing generated code (CubeMX, EtherCAT SSC, etc.). For STM32, only edit between `USER CODE BEGIN / END` so changes survive regeneration.
+- If something comes up mid-task that you&#x27;re unsure about (an unclear requirement, a register or timing detail you can&#x27;t confirm, a change that affects other modules), stop and ask the user instead of guessing.
 
 ## Verification
 - By default, only review your own changes; for simple changes, check the diff and stop. Do not build, flash, or run tests unless the user asks.
